@@ -58,7 +58,7 @@ object Whitepaper extends Build {
     settings = buildSettings ++ Seq(
       libraryDependencies <++= scalaVersion(_ => Seq(
         "org.scala-tools.time" %% "time" % "0.5",
-        "commons-dbcp" %% "commons-dbcp" % "1.4"
+        "commons-dbcp" % "commons-dbcp" % "1.4"
       ) ++ loggingDependencies ++ testDependencies)
     ) ++ Seq(resolvers += localResolver)
   )
