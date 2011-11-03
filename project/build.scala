@@ -14,21 +14,37 @@ object Whitepaper extends Build {
     scalacOptions ++= Seq("-Xcheckinit", "-encoding", "utf8")
   )
 
+  val localResolver = "Local Maven Repository" at "file:///" + System.getProperty("user.home") + "/.m2/repository/"
+
+  val loggingDependencies = Seq(
+    "ch.qos.logback" % "logback-classic" % "0.9.25" withSources(),
+    "org.codehaus.groovy" % "groovy" % "1.8.0" withSources(),
+    "org.slf4j" % "slf4j-api" % "1.6.2" withSources(),
+    "org.clapper" %% "grizzled-slf4j" % "0.6.6"
+  )
+
+  val testDependencies = Seq(
+    "org.scalatest" %% "scalatest" % "1.6.1" % "test"
+  )
+
+
   override val settings = super.settings :+ 
     (shellPrompt := { s => Project.extract(s).currentProject.id + "> " })
 
   lazy val cache = Project(id("cache"), file("cache"),
     settings = buildSettings ++ Seq(
       libraryDependencies <++= scalaVersion(_ => Seq(
-        "org.scalatest" %% "scalatest" % "1.6.1",
-         "net.sf.ehcache" % "ehcache" % "1.5.0" withSources(),
-        // Logging
-        "ch.qos.logback" % "logback-classic" % "0.9.25" withSources(),
-        "org.codehaus.groovy" % "groovy" % "1.8.0" withSources(),
-        "org.slf4j" % "slf4j-api" % "1.6.2" withSources(),
-        "org.clapper" %% "grizzled-slf4j" % "0.6.6"
-      ))
+         "net.sf.ehcache" % "ehcache" % "1.5.0" withSources()
+      ) ++ loggingDependencies ++ testDependencies)
     )
+  )
+
+  lazy val sql = Project(id("sql"), file("sql"),
+    settings = buildSettings ++ Seq(
+      libraryDependencies <++= scalaVersion(_ => Seq(
+        "org.scala-tools.time" %% "time" % "0.5"
+      ) ++ loggingDependencies ++ testDependencies)
+    ) ++ Seq(resolvers += localResolver)
   )
 
 }
