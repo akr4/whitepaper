@@ -3,30 +3,44 @@ package whitepaper.sql
 import java.sql.{ Connection, PreparedStatement, ResultSet, SQLException, DriverManager, Driver }
 import scala.util.control.Exception._  
 
-object Types {
-  type PK = Int
+trait ConnectionFactory {
+  def newConnection: Connection
 }
 
-import Types._
+trait JdbcDriverConnectionFactory extends ConnectionFactory {
+  protected val url: String
+  protected val driverClass: Class[_ <: Driver]
+  final def newConnection: Connection = {
+    Class.forName(driverClass.getName)
+    val conn = DriverManager.getConnection(url)
+    conn.setAutoCommit(false)
+    afterConnect(conn)
+    conn
+  }
 
-trait ConnectionDefinition[A] {
-  val url: String
-  val driverClass: Class[A]
+  protected def afterConnect(conn: Connection) {}
 }
 
-class PostgreSqlConnectionDefinition(host: String, database: String) extends ConnectionDefinition[org.postgresql.Driver] {
-  val url = "jdbc:postgresql://%s/%s".format(host, database)
+class PostgresqlConnectionFactory(host: String, database: String) extends JdbcDriverConnectionFactory {
+  override val url = "jdbc:postgresql://%s/%s".format(host, database)
   override val driverClass = classOf[org.postgresql.Driver]
 }
 
-class Database[A <: Driver](connDef: ConnectionDefinition[A]) extends Using {
-  def inTransaction[A](f: Query => A): A = {
-    Class.forName(connDef.driverClass.getName())
-    val conn = DriverManager.getConnection(connDef.url)
-    conn.setAutoCommit(false)
-    val query = new Query(conn)
+class Session(conn: Connection) extends Using {
+  def select[A](sql: String)(f: Row => A): Iterator[A] = {
+    // how to close stmt and rs when iterator is not used?
+    val stmt = conn.prepareStatement(sql)
+    val rs = stmt.executeQuery
+    new ResultSetIterator(rs).map(rs => f(new Row(this, rs)))
+  }
+}
+
+class Database[A <: Driver](connectionFactory: ConnectionFactory) extends Using {
+  def inTransaction[A](f: Session => A): A = {
+    val conn = connectionFactory.newConnection
+    val session = new Session(conn)
     try {
-      val result = f(query)
+      val result = f(session)
       conn.commit
       result
     } catch {
@@ -39,19 +53,11 @@ class Database[A <: Driver](connDef: ConnectionDefinition[A]) extends Using {
   }
 }
 
-class Query(conn: Connection) extends Using {
-  def select[A](sql: String)(f: Row => A): Iterator[A] = {
-    // how to close stmt and rs when iterator is not used?
-    val stmt = conn.prepareStatement(sql)
-    val rs = stmt.executeQuery
-    new ResultSetIterator(rs).map(rs => f(new Row(this, rs)))
-  }
-}
-
-class Row(query: Query, rs: ResultSet) {
+class Row(query: Session, rs: ResultSet) {
   def int(n: Int): Int = rs.getInt(n)
   def string(n: Int): String = rs.getString(n)
-  def manyToOne[A](n: Int)(select: (Query, PK) => A): ManyToOne[A] = new ManyToOne[A](query, rs.getInt(n), select)
+  def manyToOne[A, PK](n: Int)(select: (Session, PK) => A): ManyToOne[A, PK] =
+    new ManyToOne[A, PK](query, rs.getObject(n).asInstanceOf[PK], select)
 }
 
 trait Using {
@@ -63,7 +69,7 @@ class ResultSetIterator(rs: ResultSet) extends Iterator[ResultSet] {
   def next(): ResultSet = rs
 }
 
-class ManyToOne[A](query: Query, fk: PK, select: (Query, PK) => A) {
+class ManyToOne[A, PK](query: Session, fk: PK, select: (Session, PK) => A) {
   def get: A = select(query, fk)
 }
 
