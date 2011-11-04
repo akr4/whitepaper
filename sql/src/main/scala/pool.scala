@@ -21,10 +21,18 @@ import org.apache.commons.dbcp.{ ConnectionFactory => CF, PoolableConnectionFact
 // TODO: move validationQuery to ConnectionFactory or something to know about DB
 class PoolingConnectionFactory(underlying: ConnectionFactory, validationQuery: String) extends ConnectionFactory {
 
-  val connectionPool = new GenericObjectPool(null)
+  val pool = new GenericObjectPool(null)
+  val size = 5
+  pool.setInitialSize(size)
+  pool.setMaxActive(size)
+  pool.setMinIdle(size)
+  pool.setMaxIdle(size)
+  pool.setMaxWait(5000)
+  pool.setTestOnBorrow(true)
+
   val connectionFactory = new CommonsDbcpConnectionFactoryAdapter(underlying)
   val poolableConnectionFactory = new PoolableConnectionFactory(
-    connectionFactory, connectionPool, null, validationQuery, false, false 
+    connectionFactory, pool, null, validationQuery, false, false 
   )
   val dataSource = new PoolingDataSource(connectionPool)
   
