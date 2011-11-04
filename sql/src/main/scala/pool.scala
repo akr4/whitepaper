@@ -17,13 +17,13 @@ package whitepaper.sql
 
 import java.sql.{ Connection, Driver, DriverManager }
 import org.apache.commons.dbcp.{ ConnectionFactory => CF, PoolableConnectionFactory, PoolingDataSource }
+import org.apache.commons.pool.impl.GenericObjectPool 
 
 // TODO: move validationQuery to ConnectionFactory or something to know about DB
 class PoolingConnectionFactory(underlying: ConnectionFactory, validationQuery: String) extends ConnectionFactory {
 
   val pool = new GenericObjectPool(null)
   val size = 5
-  pool.setInitialSize(size)
   pool.setMaxActive(size)
   pool.setMinIdle(size)
   pool.setMaxIdle(size)
@@ -34,7 +34,7 @@ class PoolingConnectionFactory(underlying: ConnectionFactory, validationQuery: S
   val poolableConnectionFactory = new PoolableConnectionFactory(
     connectionFactory, pool, null, validationQuery, false, false 
   )
-  val dataSource = new PoolingDataSource(connectionPool)
+  val dataSource = new PoolingDataSource(pool)
   
   final def newConnection: Connection = dataSource.getConnection()
 }
