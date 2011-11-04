@@ -28,6 +28,7 @@ class Session(conn: Connection) extends Using {
       using(stmt.executeQuery) { new ResultSetIterator(_).map(rs => f(new Row(this, rs))).toSeq }
     }
   }
+  def selectOne[A](sql: String)(f: Row => A): Option[A] = select(sql)(f).headOption
 }
 
 class Database(connectionFactory: ConnectionFactory) extends Using {
