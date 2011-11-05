@@ -13,24 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package whitepaper.sql
+package whitepaper.sql.postgresql
 
-import java.sql.{ Connection, Driver, DriverManager }
+import whitepaper.sql._
 
-trait JdbcDriverConnectionFactory extends ConnectionFactory {
-  protected val url: String
-  protected val driverClass: Class[_ <: Driver]
-  protected val username: String
-  protected val password: String
-
-  final def newConnection: Connection = {
-    Class.forName(driverClass.getName)
-    val conn = DriverManager.getConnection(url)
-    conn.setAutoCommit(false)
-    afterConnect(conn)
-    conn
-  }
-
-  protected def afterConnect(conn: Connection) {}
+class PostgresqlConnectionFactory(
+  host: String, database: String, val username: String, val password: String
+) extends JdbcDriverConnectionFactory {
+  val url = "jdbc:postgresql://%s/%s".format(host, database)
+  val driverClass = classOf[org.postgresql.Driver]
 }
 

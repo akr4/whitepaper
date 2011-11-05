@@ -17,16 +17,20 @@ package whitepaper.sql
 
 import java.sql.{ Connection, Driver, DriverManager }
 import org.apache.commons.dbcp.{ ConnectionFactory => CF, PoolableConnectionFactory, PoolingDataSource }
+import org.apache.commons.pool.impl.GenericObjectPool 
 
 // TODO: move validationQuery to ConnectionFactory or something to know about DB
-class PoolingConnectionFactory(underlying: ConnectionFactory, validationQuery: String) extends ConnectionFactory {
-
+class PoolingConnectionFactory(
+  underlying: ConnectionFactory,
+  initialSize: Int,
+  maxSize: Int,
+  validationQuery: String
+) extends ConnectionFactory {
   val pool = new GenericObjectPool(null)
-  val size = 5
-  pool.setInitialSize(size)
-  pool.setMaxActive(size)
-  pool.setMinIdle(size)
-  pool.setMaxIdle(size)
+  pool.setMinIdle(initialSize)
+  pool.setMaxActive(maxSize)
+  pool.setMaxIdle(maxSize)
+  pool.setWhenExhaustedAction(GenericObjectPool.WHEN_EXHAUSTED_FAIL)
   pool.setMaxWait(5000)
   pool.setTestOnBorrow(true)
 
@@ -34,12 +38,12 @@ class PoolingConnectionFactory(underlying: ConnectionFactory, validationQuery: S
   val poolableConnectionFactory = new PoolableConnectionFactory(
     connectionFactory, pool, null, validationQuery, false, false 
   )
-  val dataSource = new PoolingDataSource(connectionPool)
+  val dataSource = new PoolingDataSource(pool)
   
-  final def newConnection: Connection = dataSource.getConnection()
+  def newConnection: Connection = dataSource.getConnection()
 }
 
-class CommonsDbcpConnectionFactoryAdapter(underlying: ConnectionFactory) extends CF {
+sealed class CommonsDbcpConnectionFactoryAdapter(underlying: ConnectionFactory) extends CF {
   def createConnection(): Connection = underlying.newConnection
 }
 

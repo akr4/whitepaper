@@ -13,7 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package whitepaper.cache
+package whitepaper.cache.ehcache
+
+import whitepaper.cache._
 
 import net.sf.ehcache.{ CacheManager, Cache => ECache, Element }
 import grizzled.slf4j.Logging
