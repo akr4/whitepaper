@@ -20,6 +20,9 @@ import java.sql.{ Connection, Driver, DriverManager }
 trait JdbcDriverConnectionFactory extends ConnectionFactory {
   protected val url: String
   protected val driverClass: Class[_ <: Driver]
+  protected val username: String
+  protected val password: String
+
   final def newConnection: Connection = {
     Class.forName(driverClass.getName)
     val conn = DriverManager.getConnection(url)
