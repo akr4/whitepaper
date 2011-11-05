@@ -45,7 +45,7 @@ object Ehcache {
    * @tparam V type of value
    * @param name cache name
    */
-  def apply[K, V](name: String)(implicit cacheKeyGenerator: CacheKeyGenerator[Serializable]): Cache[K, V] = {
+  def apply[K, V](name: String)(implicit cacheKeyGenerator: CacheKeyGenerator[_]): Cache[K, V] = {
     val c = manager.getCache(name)
     if (c == null) throw new IllegalArgumentException("no cache %s found".format(name))
     else new EhcacheCache(c, cacheKeyGenerator)
