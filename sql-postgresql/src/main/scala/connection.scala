@@ -18,9 +18,9 @@ package whitepaper.sql.postgresql
 import whitepaper.sql._
 
 class PostgresqlConnectionFactory(
-  host: String, database: String, username: String, password: String
+  host: String, database: String, val username: String, val password: String
 ) extends JdbcDriverConnectionFactory {
-  override val url = "jdbc:postgresql://%s/%s".format(host, database)
-  override val driverClass = classOf[org.postgresql.Driver]
+  val url = "jdbc:postgresql://%s/%s".format(host, database)
+  val driverClass = classOf[org.postgresql.Driver]
 }
 
