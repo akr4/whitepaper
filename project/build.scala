@@ -22,8 +22,6 @@ object Whitepaper extends Build {
 
   val buildSettings = Defaults.defaultSettings ++ Seq(
     organization := "net.physalis",
-    name := "whitepaper",
-    version := "0.1-SNAPSHOT",
     crossScalaVersions := Seq("2.9.0", "2.9.0-1", "2.9.1"),
     scalaVersion := "2.9.1",
     scalacOptions ++= Seq("-Xcheckinit", "-encoding", "utf8")
@@ -39,15 +37,19 @@ object Whitepaper extends Build {
   )
 
   val testDependencies = Seq(
-    "org.scalatest" %% "scalatest" % "1.6.1" % "test"
+    "org.scalatest" %% "scalatest" % "1.6.1" % "test",
+    "com.borachio" %% "borachio-scalatest-support" % "latest.integration" % "test"
   )
 
 
   override val settings = super.settings :+ 
     (shellPrompt := { s => Project.extract(s).currentProject.id + "> " })
 
+  lazy val whitepaper = Project("whitepaper", file(".")) aggregate(cache, sql, sqlPostgresql)
+
   lazy val cache = Project(id("cache"), file("cache"),
     settings = buildSettings ++ Seq(
+      version := "0.1-SNAPSHOT",
       libraryDependencies <++= scalaVersion(_ => Seq(
          "net.sf.ehcache" % "ehcache" % "1.5.0" withSources()
       ) ++ loggingDependencies ++ testDependencies)
@@ -56,12 +58,22 @@ object Whitepaper extends Build {
 
   lazy val sql = Project(id("sql"), file("sql"),
     settings = buildSettings ++ Seq(
+      version := "0.1-SNAPSHOT",
       libraryDependencies <++= scalaVersion(_ => Seq(
         "org.scala-tools.time" %% "time" % "0.5",
-        "commons-dbcp" % "commons-dbcp" % "1.4"
+        "commons-dbcp" % "commons-dbcp" % "1.4",
+        "org.hsqldb" % "hsqldb" % "[2,)" % "test"
       ) ++ loggingDependencies ++ testDependencies)
     ) ++ Seq(resolvers += localResolver)
   )
 
+  lazy val sqlPostgresql = Project(id("sql-postgresql"), file("sql-postgresql"),
+    settings = buildSettings ++ Seq(
+      version := "0.1-SNAPSHOT",
+      libraryDependencies <++= scalaVersion(_ => Seq(
+        "postgresql" % "postgresql" % "8.4-701.jdbc4"
+      ) ++ loggingDependencies ++ testDependencies)
+    )
+  ) dependsOn(sql)
 }
 

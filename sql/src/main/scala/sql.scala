@@ -22,17 +22,52 @@ trait ConnectionFactory {
   def newConnection: Connection
 }
 
+case class TooManyRowsException(expected: Int, actual: Int) extends Exception
+
 class Session(conn: Connection) extends Using {
-  def select[A](sql: String)(f: Row => A): Seq[A] = {
+  def select[A](sql: String, params: Any*)(f: Row => A): List[A] = {
     using(conn.prepareStatement(sql)) { stmt =>
-      using(stmt.executeQuery) { new ResultSetIterator(_).map(rs => f(new Row(this, rs))).toSeq }
+      updateParams(stmt, params: _*)
+      using(stmt.executeQuery) { new ResultSetIterator(_).map(rs => f(new Row(this, rs))).toList }
     }
   }
-  def selectOne[A](sql: String)(f: Row => A): Option[A] = select(sql)(f).headOption
+
+  def selectOne[A](sql: String, params: Any*)(f: Row => A): Option[A] = {
+    val result = select(sql, params: _*)(f)
+    result match {
+      case x :: Nil => Some(x)
+      case Nil => None
+      case _ => throw new TooManyRowsException(1, result.size)
+    }
+  }
+
+  def execute(sql: String, params: Any*) {
+    using(conn.prepareStatement(sql)) { stmt =>
+      updateParams(stmt, params: _*)
+      stmt.executeUpdate()
+    }
+  }
+
+  private def updateParams(stmt: PreparedStatement, params: Any*) {
+    for (pair <- params.zipWithIndex) {
+      pair match {
+        case (param: String, n) => stmt.setString(n + 1, param)
+        case (param: Int, n) => stmt.setInt(n + 1, param)
+        case (param: Long, n) => stmt.setLong(n + 1, param)
+        case _ => throw new IllegalArgumentException
+      }
+    }
+  }
 }
 
 class Database(connectionFactory: ConnectionFactory) extends Using {
-  def inTransaction[A](f: Session => A): A = {
+  def ddl(sql: String) {
+    using(connectionFactory.newConnection) { conn =>
+      using(conn.createStatement) { _.executeUpdate(sql) }
+    }
+  }
+
+  def withSession[A](f: Session => A): A = {
     val conn = connectionFactory.newConnection
     val session = new Session(conn)
     try {
