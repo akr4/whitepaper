@@ -22,7 +22,7 @@ import grizzled.slf4j.Logging
 
 /** Cache implementation using Ehcache */
 private class EhcacheCache[K, V](
-  underlying: ECache, val cacheKeyGenerator: CacheKeyGenerator[_]
+  underlying: ECache, override val cacheKeyGenerator: CacheKeyGenerator[_]
 ) extends Cache[K, V] with Logging {
   def _get(key: Any): Option[V] = {
     val e = underlying.get(key)
@@ -45,7 +45,9 @@ object Ehcache {
    * @tparam V type of value
    * @param name cache name
    */
-  def apply[K, V](name: String)(implicit cacheKeyGenerator: CacheKeyGenerator[_]): Cache[K, V] = {
+  def apply[K, V](name: String)(
+    implicit cacheKeyGenerator: CacheKeyGenerator[_] = NoOpCacheKeyGenerator
+  ): Cache[K, V] = {
     val c = manager.getCache(name)
     if (c == null) throw new IllegalArgumentException("no cache %s found".format(name))
     else new EhcacheCache(c, cacheKeyGenerator)

@@ -24,7 +24,7 @@ import grizzled.slf4j.Logging
 trait Cache[K, V] {
   self: Logging => // TODO: eliminate logger implementation dependency
 
-  protected val cacheKeyGenerator: CacheKeyGenerator[_]
+  protected val cacheKeyGenerator: CacheKeyGenerator[_] = NoOpCacheKeyGenerator
 
   /** Returns value corresponding to the given key */
   final def get(key: K): Option[V] = _get(cacheKey(key))
@@ -65,7 +65,7 @@ trait Cache[K, V] {
  *
  * Note: This holds all values in memory and is not suitable for non-small values
  */
-class MapCache[K, V](val cacheKeyGenerator: CacheKeyGenerator[_]) extends Cache[K, V] with Logging {
+private class MapCache[K, V](override val cacheKeyGenerator: CacheKeyGenerator[_]) extends Cache[K, V] with Logging {
   private val map = scala.collection.mutable.Map.empty[Any, V]
 
   def _get(key: Any): Option[V] = map.get(key)
@@ -74,6 +74,7 @@ class MapCache[K, V](val cacheKeyGenerator: CacheKeyGenerator[_]) extends Cache[
   override def toString(): String = "MapCache(%s)".format(map)
 }
 object MapCache {
-  def apply[K, V](cacheKeyGenerator: CacheKeyGenerator[_]) = new MapCache[K, V](cacheKeyGenerator)
+  def apply[K, V](implicit cacheKeyGenerator: CacheKeyGenerator[_] = NoOpCacheKeyGenerator): Cache[K, V] =
+    new MapCache[K, V](cacheKeyGenerator)
 }
 
