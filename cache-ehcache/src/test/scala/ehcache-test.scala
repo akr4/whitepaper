@@ -17,7 +17,7 @@ package whitepaper.cache.ehcache
 
 import whitepaper.cache._
 
-import net.sf.ehcache.{ CacheManager, Cache => ECache, Element }
+import net.sf.ehcache.CacheManager
 
 import org.scalatest.FunSuite
 import org.scalatest.BeforeAndAfter
@@ -26,12 +26,12 @@ import org.scalatest.matchers.ShouldMatchers
 class EhcacheSuite extends FunSuite with BeforeAndAfter {
 
   implicit val cacheKeyGenerator = ToStringCacheKeyGenerator
+  implicit val cacheManager = CacheManager.getInstance()
 
-  val manager = CacheManager.getInstance()
-  manager.addCache("cache1")
+  cacheManager.addCache("cache1")
 
   before {
-    manager.clearAll
+    cacheManager.clearAll
   }
 
   test("caches value if there's no cache") {

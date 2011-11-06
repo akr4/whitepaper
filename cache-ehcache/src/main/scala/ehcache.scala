@@ -37,8 +37,6 @@ private class EhcacheCache[K, V](
 
 /** Cache factory using Ehcache */
 object Ehcache {
-  private val manager = CacheManager.getInstance()
-
   /** Returns Cache instance
    * 
    * @tparam K type of key
@@ -46,9 +44,10 @@ object Ehcache {
    * @param name cache name
    */
   def apply[K, V](name: String)(
-    implicit cacheKeyGenerator: CacheKeyGenerator[_] = NoOpCacheKeyGenerator
+    implicit cacheManager: CacheManager,
+    cacheKeyGenerator: CacheKeyGenerator[_] = NoOpCacheKeyGenerator
   ): Cache[K, V] = {
-    val c = manager.getCache(name)
+    val c = cacheManager.getCache(name)
     if (c == null) throw new IllegalArgumentException("no cache %s found".format(name))
     else new EhcacheCache(c, cacheKeyGenerator)
   }
