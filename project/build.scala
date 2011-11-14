@@ -92,5 +92,14 @@ object Whitepaper extends Build {
       ) ++ loggingDependencies ++ testDependencies)
     )
   ) dependsOn(sql)
+
+  lazy val config = Project(id("config"), file("config"),
+    settings = buildSettings ++ Seq(
+      version := "0.1",
+      libraryDependencies <++= scalaVersion(_ => Seq(
+      ) ++ loggingDependencies ++ testDependencies)
+    )
+  )
+
 }
 
