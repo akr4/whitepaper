@@ -35,7 +35,7 @@ class ConfigSuite extends FunSuite with BeforeAndAfter {
     }
   }
 
-  test("should return appropriate config") {
+  test("should return config corresponding to prop") {
     trait Config { val name: String }
 
     val env = Environment("whitepaper",
@@ -46,6 +46,29 @@ class ConfigSuite extends FunSuite with BeforeAndAfter {
     Properties.setProp("whitepaper.env", "dev")
     val config = env.current
     assert(config.name === "dev")
+  }
+
+  test("should rerutrn config corresponding to hostname") {
+    val hostname = java.net.InetAddress.getLocalHost.getHostName
+    val env = Environment("whitepaper",
+      "some host" -> false,
+      hostname -> true
+    )
+
+    val config = env.current
+    assert(config === true)
+  }
+
+  test("prop is prior to hostname") {
+    val hostname = java.net.InetAddress.getLocalHost.getHostName
+    val env = Environment("whitepaper",
+      "prop" -> "prop",
+      hostname -> "hostname"
+    )
+    
+    Properties.setProp("whitepaper.env", "prop")
+    val config = env.current
+    assert(config === "prop")
   }
 
 }

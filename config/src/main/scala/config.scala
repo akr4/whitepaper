@@ -1,4 +1,3 @@
-
 /*
  * Copyright 2011 Akira Ueda
  *
@@ -17,28 +16,32 @@
 package whitepaper.config
 
 import scala.util.Properties
+import java.net.InetAddress
 import grizzled.slf4j.Logger
 
 class Environment[A](appName: String, configs: Pair[String, A]*) {
 
+  def current: A = {
+    (configFromProp orElse configFromHostname orElse error).get
+  }
+
+
   private val logger = Logger[this.type]
   private val configMap = configs.toMap
+  private lazy val envKey = appName + ".env"
 
-  lazy val envKey = appName + ".env"
+  private def configFromHostname: Option[A] = {
+    configMap.get(InetAddress.getLocalHost.getHostName) 
+  }
 
-  def current: A = {
+  private def configFromProp: Option[A] = {
     Properties.propOrNone(envKey) match {
-      case Some(e) => {
-        configMap.get(e) match {
-          case Some(c) => c
-          case None => error
-        }
-      }
-      case None => error
+      case Some(e) => { configMap.get(e) }
+      case None => None
     }
   }
 
-  private def error: A = {
+  private def error: Option[A] = {
     val m = "cannot determin environment"
     logger.error(m)
     logger.info("""
