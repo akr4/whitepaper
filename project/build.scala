@@ -21,6 +21,7 @@ object Whitepaper extends Build {
   def id(name: String) = "whitepaper-%s" format name
 
   val buildSettings = Defaults.defaultSettings ++ Seq(
+    version := "0.2",
     organization := "net.physalis",
     crossScalaVersions := Seq("2.9.0", "2.9.0-1", "2.9.1"),
     scalaVersion := "2.9.1",
@@ -52,21 +53,17 @@ object Whitepaper extends Build {
     (shellPrompt := { s => Project.extract(s).currentProject.id + "> " })
 
   lazy val whitepaper = Project("whitepaper", file("."),
-    settings = buildSettings ++ Seq(
-      version := "0.1"
-    )
+    settings = buildSettings
   ) aggregate(cache, cacheEhcache, sql, sqlPostgresql)
 
   lazy val cache = Project(id("cache"), file("cache"),
     settings = buildSettings ++ Seq(
-      version := "0.1",
       libraryDependencies := loggingDependencies ++ testDependencies
     )
   )
 
   lazy val cacheEhcache = Project(id("cache-ehcache"), file("cache-ehcache"),
     settings = buildSettings ++ Seq(
-      version := "0.1",
       libraryDependencies <++= scalaVersion(_ => Seq(
          "net.sf.ehcache" % "ehcache" % "1.5.0" withSources()
       ) ++ loggingDependencies ++ testDependencies)
@@ -75,7 +72,6 @@ object Whitepaper extends Build {
 
   lazy val sql = Project(id("sql"), file("sql"),
     settings = buildSettings ++ Seq(
-      version := "0.1",
       libraryDependencies <++= scalaVersion(_ => Seq(
         "org.scala-tools.time" %% "time" % "0.5",
         "commons-dbcp" % "commons-dbcp" % "1.4",
@@ -86,7 +82,6 @@ object Whitepaper extends Build {
 
   lazy val sqlPostgresql = Project(id("sql-postgresql"), file("sql-postgresql"),
     settings = buildSettings ++ Seq(
-      version := "0.1",
       libraryDependencies <++= scalaVersion(_ => Seq(
         "postgresql" % "postgresql" % "8.4-701.jdbc4"
       ) ++ loggingDependencies ++ testDependencies)
@@ -95,7 +90,6 @@ object Whitepaper extends Build {
 
   lazy val config = Project(id("config"), file("config"),
     settings = buildSettings ++ Seq(
-      version := "0.1",
       libraryDependencies <++= scalaVersion(_ => Seq(
       ) ++ loggingDependencies ++ testDependencies)
     )
