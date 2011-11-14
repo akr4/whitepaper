@@ -22,6 +22,11 @@ trait CacheKeyGenerator[A] {
   def generate(data: Any*): A
 }
 
+/** Generator which returns input value as is */
+object NoOpCacheKeyGenerator extends CacheKeyGenerator[Any] {
+  def generate(data: Any*): Any = data
+}
+
 /** Generator which concatenate each parameter */
 object ToStringCacheKeyGenerator extends CacheKeyGenerator[String] {
   def generate(data: Any*): String = data.toArray.deep.mkString(",")
