@@ -1,6 +1,10 @@
 Example
 --------------
 
+```scala
+
+import whitepaper.config.Environment
+
 trait Config {
   val dbUser: String
   val dbPassword: String
@@ -32,4 +36,4 @@ class B {
     println(Env.get.dbPassword)
   }
 }
-
+```
