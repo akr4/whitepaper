@@ -37,9 +37,9 @@ object Whitepaper extends Build {
   val localResolver = "Local Maven Repository" at "file:///" + System.getProperty("user.home") + "/.m2/repository/"
 
   val loggingDependencies = Seq(
-    "ch.qos.logback" % "logback-classic" % "0.9.25" withSources(),
-    "org.codehaus.groovy" % "groovy" % "1.8.0" withSources(),
-    "org.slf4j" % "slf4j-api" % "1.6.2" withSources(),
+    "ch.qos.logback" % "logback-classic" % "0.9.25" withSources,
+    "org.codehaus.groovy" % "groovy" % "1.8.0" withSources,
+    "org.slf4j" % "slf4j-api" % "1.6.2" withSources,
     "org.clapper" %% "grizzled-slf4j" % "0.6.6"
   )
 
@@ -65,7 +65,7 @@ object Whitepaper extends Build {
   lazy val cacheEhcache = Project(id("cache-ehcache"), file("cache-ehcache"),
     settings = buildSettings ++ Seq(
       libraryDependencies <++= scalaVersion(_ => Seq(
-         "net.sf.ehcache" % "ehcache" % "1.5.0" withSources()
+         "net.sf.ehcache" % "ehcache" % "1.5.0" withSources
       ) ++ loggingDependencies ++ testDependencies)
     )
   ) dependsOn(cache)
