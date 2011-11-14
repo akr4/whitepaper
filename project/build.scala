@@ -54,7 +54,7 @@ object Whitepaper extends Build {
 
   lazy val whitepaper = Project("whitepaper", file("."),
     settings = buildSettings
-  ) aggregate(cache, cacheEhcache, sql, sqlPostgresql)
+  ) aggregate(cache, cacheEhcache, sql, sqlPostgresql, config)
 
   lazy val cache = Project(id("cache"), file("cache"),
     settings = buildSettings ++ Seq(
