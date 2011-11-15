@@ -3,15 +3,15 @@ Example
 
 ```scala
 
-import whitepaper.config.Environment
+import whitepaper.config.Environments
 
 trait Config {
   val dbUser: String
   val dbPassword: String
 }
 
-object Env {
-  private val env = Environment("whitepaper",
+object Environment {
+  private val env = Environments("whitepaper",
     "dev" -> new Config {
       val dbUser = "dbUser"
       val dbPassword = "dbPassword"
@@ -27,7 +27,7 @@ object Env {
 
 class A {
   def a {
-    println(Env.get.dbUser)
+    println(Environment.get.dbUser)
   }
 }
 
