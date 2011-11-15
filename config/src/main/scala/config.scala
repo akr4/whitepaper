@@ -19,9 +19,19 @@ import scala.util.Properties
 import java.net.InetAddress
 import grizzled.slf4j.Logger
 
+/** provides environment specified configuration
+ *
+ * @tparam A type of configuration
+ * @param appName application name which system property key is made from
+ * @param configs config definitions. env name -> config instance pair
+ */
 class Environment[A](appName: String, configs: Pair[String, A]*) {
 
-  def current: A = {
+  /** returns a config of current environment or throw exception if not found
+   *
+   * @throw IllegalStateException when no appropriate config found
+   */
+  lazy val current: A = {
     (configFromProp orElse configFromHostname orElse error).get
   }
 
@@ -35,10 +45,7 @@ class Environment[A](appName: String, configs: Pair[String, A]*) {
   }
 
   private def configFromProp: Option[A] = {
-    Properties.propOrNone(envKey) match {
-      case Some(e) => { configMap.get(e) }
-      case None => None
-    }
+    Properties.propOrNone(envKey).flatMap(configMap.get(_))
   }
 
   private def error: Option[A] = {
@@ -57,6 +64,7 @@ class Environment[A](appName: String, configs: Pair[String, A]*) {
 
 }
 
+/** Factory of Environment */
 object Environment {
   def apply[A](appName: String, configs: Pair[String, A]*): Environment[A] = new Environment(appName, configs: _*)
 }
