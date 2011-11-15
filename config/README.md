@@ -10,15 +10,15 @@ trait Config {
   val dbPassword: String
 }
 
-object Environment {
+object Env {
   private val env = Environments("whitepaper",
     "dev" -> new Config {
-      val dbUser = "dbUser"
-      val dbPassword = "dbPassword"
+      val dbUser = "dbUser_dev"
+      val dbPassword = "dbPassword_dev"
     },
     "prod" -> new Config {
-      val dbUser = "dbUser"
-      val dbPassword = "dbPassword"
+      val dbUser = "dbUser_prod"
+      val dbPassword = "dbPassword_prod"
     }
   )
 
@@ -27,7 +27,8 @@ object Environment {
 
 class A {
   def a {
-    println(Environment.get.dbUser)
+    // if JVM started with -Dwhitepaper.env=dev or the hostname is "dev", this will be "dbUser_dev"
+    println(Env.get.dbUser)
   }
 }
 
