@@ -25,7 +25,7 @@ import grizzled.slf4j.Logger
  * @param appName application name which system property key is made from
  * @param configs config definitions. env name -> config instance pair
  */
-class Environment[A](appName: String, configs: Pair[String, A]*) {
+class Environments[A](appName: String, configs: Pair[String, A]*) {
 
   /** returns a config of current environment or throw exception if not found
    *
@@ -65,7 +65,7 @@ class Environment[A](appName: String, configs: Pair[String, A]*) {
 }
 
 /** Factory of Environment */
-object Environment {
-  def apply[A](appName: String, configs: Pair[String, A]*): Environment[A] = new Environment(appName, configs: _*)
+object Environments {
+  def apply[A](appName: String, configs: Pair[String, A]*): Environments[A] = new Environments(appName, configs: _*)
 }
 

@@ -25,7 +25,7 @@ class ConfigSuite extends FunSuite with BeforeAndAfter {
   after { Properties.clearProp("whitepaper.env") } 
 
   test("should throw exception when no env property") {
-    val env = Environment("whitepaper",
+    val env = Environments("whitepaper",
       "dev" -> "1",
       "prod" -> "2"
     )
@@ -38,7 +38,7 @@ class ConfigSuite extends FunSuite with BeforeAndAfter {
   test("should return config corresponding to prop") {
     trait Config { val name: String }
 
-    val env = Environment("whitepaper",
+    val env = Environments("whitepaper",
       "dev" -> new Config { val name = "dev" },
       "prod" -> new Config { val name = "prod" }
     )
@@ -50,7 +50,7 @@ class ConfigSuite extends FunSuite with BeforeAndAfter {
 
   test("should rerutrn config corresponding to hostname") {
     val hostname = java.net.InetAddress.getLocalHost.getHostName
-    val env = Environment("whitepaper",
+    val env = Environments("whitepaper",
       "some host" -> false,
       hostname -> true
     )
@@ -61,7 +61,7 @@ class ConfigSuite extends FunSuite with BeforeAndAfter {
 
   test("prop is prior to hostname") {
     val hostname = java.net.InetAddress.getLocalHost.getHostName
-    val env = Environment("whitepaper",
+    val env = Environments("whitepaper",
       "prop" -> "prop",
       hostname -> "hostname"
     )
