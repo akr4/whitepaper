@@ -3,7 +3,7 @@ Example
 
 ```scala
 
-import whitepaper.config.Environment
+import whitepaper.config.Environments
 
 trait Config {
   val dbUser: String
@@ -11,14 +11,14 @@ trait Config {
 }
 
 object Env {
-  private val env = Environment("whitepaper",
+  private val env = Environments("whitepaper",
     "dev" -> new Config {
-      val dbUser = "dbUser"
-      val dbPassword = "dbPassword"
+      val dbUser = "dbUser_dev"
+      val dbPassword = "dbPassword_dev"
     },
     "prod" -> new Config {
-      val dbUser = "dbUser"
-      val dbPassword = "dbPassword"
+      val dbUser = "dbUser_prod"
+      val dbPassword = "dbPassword_prod"
     }
   )
 
@@ -27,6 +27,7 @@ object Env {
 
 class A {
   def a {
+    // if JVM started with -Dwhitepaper.env=dev or the hostname is "dev", this will be "dbUser_dev"
     println(Env.get.dbUser)
   }
 }
