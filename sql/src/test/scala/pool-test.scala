@@ -17,7 +17,6 @@ package whitepaper.sql
 
 import org.scalatest.FunSuite
 import org.scalatest.BeforeAndAfter
-import org.scalatest.matchers.ShouldMatchers
 
 class PoolSuite extends FunSuite with BeforeAndAfter {
 
