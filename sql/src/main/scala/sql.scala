@@ -18,10 +18,6 @@ package whitepaper.sql
 import java.sql.{ Connection, PreparedStatement, ResultSet, SQLException }
 import scala.util.control.Exception._  
 
-trait ConnectionFactory {
-  def newConnection: Connection
-}
-
 case class TooManyRowsException(expected: Int, actual: Int) extends Exception
 
 class Session(conn: Connection) extends Using {
@@ -56,30 +52,6 @@ class Session(conn: Connection) extends Using {
         case (param: Long, n) => stmt.setLong(n + 1, param)
         case _ => throw new IllegalArgumentException
       }
-    }
-  }
-}
-
-class Database(connectionFactory: ConnectionFactory) extends Using {
-  def ddl(sql: String) {
-    using(connectionFactory.newConnection) { conn =>
-      using(conn.createStatement) { _.executeUpdate(sql) }
-    }
-  }
-
-  def withSession[A](f: Session => A): A = {
-    val conn = connectionFactory.newConnection
-    val session = new Session(conn)
-    try {
-      val result = f(session)
-      conn.commit
-      result
-    } catch {
-      case e: SQLException =>
-        ignoring(classOf[SQLException]) { conn.rollback }
-        throw e
-    } finally {
-      ignoring(classOf[SQLException]) opt conn.close
     }
   }
 }
