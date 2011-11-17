@@ -21,7 +21,6 @@ import net.sf.ehcache.CacheManager
 
 import org.scalatest.FunSuite
 import org.scalatest.BeforeAndAfter
-import org.scalatest.matchers.ShouldMatchers
 
 class EhcacheSuite extends FunSuite with BeforeAndAfter {
 

@@ -2,7 +2,6 @@ package whitepaper.cache
 
 import grizzled.slf4j.Logging
 import org.scalatest.FunSuite
-import org.scalatest.matchers.ShouldMatchers
 
 class CacheSuite extends FunSuite {
   test("caches value if there's no cache") {

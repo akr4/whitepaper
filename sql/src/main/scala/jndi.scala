@@ -15,26 +15,25 @@
  */
 package whitepaper.sql
 
-import java.sql.{ Connection, Driver, DriverManager }
+import java.sql.Connection
+import javax.naming.InitialContext
+import javax.sql.DataSource
 
-trait ConnectionFactory {
-  def newConnection: Connection
-}
+trait JndiFinder {
+  def find[A](name: String): A
+}  
 
-trait JdbcDriverConnectionFactory extends ConnectionFactory {
-  protected val url: String
-  protected val driverClass: Class[_ <: Driver]
-  protected val username: String
-  protected val password: String
+private[sql] object DefaultJndiFinder extends JndiFinder {
+  def find[A](name: String): A = { 
+    val ic = new InitialContext
+    ic.lookup(name).asInstanceOf[A]
+  } 
+} 
 
-  final def newConnection: Connection = {
-    Class.forName(driverClass.getName)
-    val conn = DriverManager.getConnection(url)
-    conn.setAutoCommit(false)
-    afterConnect(conn)
-    conn
+class DataSourceConnectionFactory(name: String, jndiFinder: JndiFinder = DefaultJndiFinder) extends ConnectionFactory {
+  def newConnection: Connection = {
+    val ds = jndiFinder.find[DataSource](name)
+    ds.getConnection
   }
-
-  protected def afterConnect(conn: Connection) {}
 }
 

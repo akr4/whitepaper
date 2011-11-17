@@ -15,26 +15,15 @@
  */
 package whitepaper.sql
 
-import java.sql.{ Connection, Driver, DriverManager }
+import java.sql.{ Connection, PreparedStatement, ResultSet, SQLException }
+import scala.util.control.Exception._  
 
-trait ConnectionFactory {
-  def newConnection: Connection
-}
-
-trait JdbcDriverConnectionFactory extends ConnectionFactory {
-  protected val url: String
-  protected val driverClass: Class[_ <: Driver]
-  protected val username: String
-  protected val password: String
-
-  final def newConnection: Connection = {
-    Class.forName(driverClass.getName)
-    val conn = DriverManager.getConnection(url)
-    conn.setAutoCommit(false)
-    afterConnect(conn)
-    conn
+class Database(tm: TransactionManager) extends Using {
+  def ddl(sql: String) {
+    // DDL is not transactional but this is the only way to get access to DB.
+    withTransaction(_.execute(sql))
   }
 
-  protected def afterConnect(conn: Connection) {}
+  def withTransaction[A](f: Session => A): A = tm.withTransaction(f)
 }
 
