@@ -15,16 +15,25 @@
  */
 package whitepaper.sql
 
+import java.sql.Connection
 import javax.naming.InitialContext
+import javax.sql.DataSource
 
 trait JndiFinder {
   def find[A](name: String): A
 }  
 
-private[sql] object JndiFinderImpl extends JndiFinder {
+private[sql] object DefaultJndiFinder extends JndiFinder {
   def find[A](name: String): A = { 
     val ic = new InitialContext
     ic.lookup(name).asInstanceOf[A]
   } 
 } 
+
+class DataSourceConnectionFactory(name: String, jndiFinder: JndiFinder = DefaultJndiFinder) extends ConnectionFactory {
+  def newConnection: Connection = {
+    val ds = jndiFinder.find[DataSource](name)
+    ds.getConnection
+  }
+}
 
