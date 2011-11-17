@@ -15,15 +15,16 @@
  */
 package whitepaper.sql
 
-import java.sql.{ Connection, PreparedStatement, ResultSet, SQLException }
-import scala.util.control.Exception._  
+import javax.naming.InitialContext
 
-class Database(tm: TransactionManager) extends Using {
-  def ddl(sql: String) {
-    // DDL is not transactional but this is the only way to get access to DB.
-    withTransaction(_.execute(sql))
-  }
+trait JndiFinder {
+  def find[A](name: String): A
+}  
 
-  def withTransaction[A](f: Session => A): A = tm.withTransaction(f)
-}
+private[sql] object JndiFinderImpl extends JndiFinder {
+  def find[A](name: String): A = { 
+    val ic = new InitialContext
+    ic.lookup(name).asInstanceOf[A]
+  } 
+} 
 

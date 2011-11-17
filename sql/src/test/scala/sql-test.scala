@@ -20,7 +20,7 @@ import org.scalatest.BeforeAndAfter
 
 class SqlSuite extends FunSuite with BeforeAndAfter {
 
-  val db = new Database(new LocalTransactionManager(new TestingHsqldbConnectionFactory))
+  val db = new Database(new LocalTransactionManager(TestingHsqldbConnectionFactory))
 
   before {
     db.ddl("create table emp (id integer primary key, name varchar(30))")

@@ -15,7 +15,7 @@
  */
 package whitepaper.sql
 
-class TestingHsqldbConnectionFactory extends JdbcDriverConnectionFactory {
+object TestingHsqldbConnectionFactory extends JdbcDriverConnectionFactory {
   val url = "jdbc:hsqldb:mem:hsqldb:test"
   val driverClass = classOf[org.hsqldb.jdbc.JDBCDriver]
   val username = ""

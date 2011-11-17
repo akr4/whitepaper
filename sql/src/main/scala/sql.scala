@@ -15,8 +15,8 @@
  */
 package whitepaper.sql
 
-import java.sql.{ Connection, PreparedStatement, ResultSet, SQLException }
 import scala.util.control.Exception._  
+import java.sql.{ Connection, PreparedStatement, ResultSet, SQLException }
 
 case class TooManyRowsException(expected: Int, actual: Int) extends Exception
 
@@ -61,10 +61,6 @@ class Row(session: Session, rs: ResultSet) {
   def string(n: Int): String = rs.getString(n)
   def manyToOne[A, PK](n: Int)(select: (Session, PK) => A): ManyToOne[A, PK] =
     new ManyToOne[A, PK](session, rs.getObject(n).asInstanceOf[PK], select)
-}
-
-trait Using {
-  def using[A <: { def close() }, B](resource: A)(f: A => B): B = try { f(resource) } finally { resource.close }
 }
 
 class ResultSetIterator(rs: ResultSet) extends Iterator[ResultSet] {

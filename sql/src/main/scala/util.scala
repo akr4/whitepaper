@@ -15,15 +15,7 @@
  */
 package whitepaper.sql
 
-import java.sql.{ Connection, PreparedStatement, ResultSet, SQLException }
-import scala.util.control.Exception._  
-
-class Database(tm: TransactionManager) extends Using {
-  def ddl(sql: String) {
-    // DDL is not transactional but this is the only way to get access to DB.
-    withTransaction(_.execute(sql))
-  }
-
-  def withTransaction[A](f: Session => A): A = tm.withTransaction(f)
+trait Using {
+  def using[A <: { def close() }, B](resource: A)(f: A => B): B = try { f(resource) } finally { resource.close }
 }
 
