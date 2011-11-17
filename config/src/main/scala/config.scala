@@ -32,23 +32,27 @@ class Environments[A](appName: String, configs: Pair[String, A]*) {
    * @throw IllegalStateException when no appropriate config found
    */
   lazy val current: A = {
-    (configFromProp orElse configFromHostname orElse error).get
+    val e = (fromSystemProperty orElse fromHostname orElse error).get
+    logger.info("current Envoronment: %s".format(e.name))
+    e.config
   }
-
 
   private val logger = Logger[this.type]
   private val configMap = configs.toMap
-  private lazy val envKey = appName + ".env"
+  private val envPropKey = appName + ".env"
+  private lazy val envPropName = Properties.propOrNone(envPropKey)
 
-  private def configFromHostname: Option[A] = {
-    configMap.get(InetAddress.getLocalHost.getHostName) 
+  private def fromHostname: Option[Environment[A]] = {
+    val h = InetAddress.getLocalHost.getHostName
+    configMap.get(h).collect { case c => new Environment(h, c) }
   }
 
-  private def configFromProp: Option[A] = {
-    Properties.propOrNone(envKey).flatMap(configMap.get(_))
+  private def fromSystemProperty: Option[Environment[A]] = envPropName match {
+    case Some(n) => configMap.get(n).collect { case c => new Environment(n, c) }
+    case None => None
   }
 
-  private def error: Option[A] = {
+  private def error: Option[Environment[A]] = {
     val m = "cannot determin environment"
     logger.error(m)
     logger.info("""
@@ -58,7 +62,7 @@ class Environments[A](appName: String, configs: Pair[String, A]*) {
       |
       |available values: %s
       |*********************************************************
-      """.stripMargin.format(envKey, envKey, configs.map(_._1).mkString(", ")))
+      """.stripMargin.format(envPropKey, envPropKey, configs.map(_._1).mkString(", ")))
     throw new IllegalStateException(m)
   }
 
@@ -69,3 +73,4 @@ object Environments {
   def apply[A](appName: String, configs: Pair[String, A]*): Environments[A] = new Environments(appName, configs: _*)
 }
 
+private class Environment[A](val name: String, val config: A)
