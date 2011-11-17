@@ -45,11 +45,11 @@ class Session(conn: Connection) extends Using {
   }
 
   private def updateParams(stmt: PreparedStatement, params: Any*) {
-    for (pair <- params.zipWithIndex) {
+    for (pair <- params.zip(Stream.iterate(1)(_ + 1))) {
       pair match {
-        case (param: String, n) => stmt.setString(n + 1, param)
-        case (param: Int, n) => stmt.setInt(n + 1, param)
-        case (param: Long, n) => stmt.setLong(n + 1, param)
+        case (p: String, n) => stmt.setString(n, p)
+        case (p: Int, n) => stmt.setInt(n, p)
+        case (p: Long, n) => stmt.setLong(n, p)
         case _ => throw new IllegalArgumentException
       }
     }
