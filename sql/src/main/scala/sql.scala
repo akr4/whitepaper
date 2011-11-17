@@ -15,12 +15,8 @@
  */
 package whitepaper.sql
 
-import java.sql.{ Connection, PreparedStatement, ResultSet, SQLException }
 import scala.util.control.Exception._  
-
-trait ConnectionFactory {
-  def newConnection: Connection
-}
+import java.sql.{ Connection, PreparedStatement, ResultSet, SQLException }
 
 case class TooManyRowsException(expected: Int, actual: Int) extends Exception
 
@@ -49,37 +45,13 @@ class Session(conn: Connection) extends Using {
   }
 
   private def updateParams(stmt: PreparedStatement, params: Any*) {
-    for (pair <- params.zipWithIndex) {
+    for (pair <- params.zip(Stream.iterate(1)(_ + 1))) {
       pair match {
-        case (param: String, n) => stmt.setString(n + 1, param)
-        case (param: Int, n) => stmt.setInt(n + 1, param)
-        case (param: Long, n) => stmt.setLong(n + 1, param)
+        case (p: String, n) => stmt.setString(n, p)
+        case (p: Int, n) => stmt.setInt(n, p)
+        case (p: Long, n) => stmt.setLong(n, p)
         case _ => throw new IllegalArgumentException
       }
-    }
-  }
-}
-
-class Database(connectionFactory: ConnectionFactory) extends Using {
-  def ddl(sql: String) {
-    using(connectionFactory.newConnection) { conn =>
-      using(conn.createStatement) { _.executeUpdate(sql) }
-    }
-  }
-
-  def withSession[A](f: Session => A): A = {
-    val conn = connectionFactory.newConnection
-    val session = new Session(conn)
-    try {
-      val result = f(session)
-      conn.commit
-      result
-    } catch {
-      case e: SQLException =>
-        ignoring(classOf[SQLException]) { conn.rollback }
-        throw e
-    } finally {
-      ignoring(classOf[SQLException]) opt conn.close
     }
   }
 }
@@ -89,10 +61,6 @@ class Row(session: Session, rs: ResultSet) {
   def string(n: Int): String = rs.getString(n)
   def manyToOne[A, PK](n: Int)(select: (Session, PK) => A): ManyToOne[A, PK] =
     new ManyToOne[A, PK](session, rs.getObject(n).asInstanceOf[PK], select)
-}
-
-trait Using {
-  def using[A <: { def close() }, B](resource: A)(f: A => B): B = try { f(resource) } finally { resource.close }
 }
 
 class ResultSetIterator(rs: ResultSet) extends Iterator[ResultSet] {

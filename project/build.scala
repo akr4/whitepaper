@@ -45,7 +45,7 @@ object Whitepaper extends Build {
 
   val testDependencies = Seq(
     "org.scalatest" %% "scalatest" % "1.6.1" % "test",
-    "com.borachio" %% "borachio-scalatest-support" % "latest.integration" % "test"
+    "org.scalamock" %% "scalamock-scalatest-support" % "latest.integration" % "test"
   )
 
 
@@ -79,6 +79,15 @@ object Whitepaper extends Build {
       ) ++ loggingDependencies ++ testDependencies)
     ) ++ Seq(resolvers += localResolver)
   )
+
+  lazy val sqlJta = Project(id("sql-jta"), file("sql-jta"),
+    settings = buildSettings ++ Seq(
+      libraryDependencies <++= scalaVersion(_ => Seq(
+        "javax.transaction" % "jta" % "1.1",
+        "org.hsqldb" % "hsqldb" % "[2,)" % "test"
+      ) ++ loggingDependencies ++ testDependencies)
+    )
+  ) dependsOn(sql)
 
   lazy val sqlPostgresql = Project(id("sql-postgresql"), file("sql-postgresql"),
     settings = buildSettings ++ Seq(

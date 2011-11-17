@@ -15,26 +15,11 @@
  */
 package whitepaper.sql
 
-import java.sql.{ Connection, Driver, DriverManager }
-
-trait ConnectionFactory {
-  def newConnection: Connection
-}
-
-trait JdbcDriverConnectionFactory extends ConnectionFactory {
-  protected val url: String
-  protected val driverClass: Class[_ <: Driver]
-  protected val username: String
-  protected val password: String
-
-  final def newConnection: Connection = {
-    Class.forName(driverClass.getName)
-    val conn = DriverManager.getConnection(url)
-    conn.setAutoCommit(false)
-    afterConnect(conn)
-    conn
-  }
-
-  protected def afterConnect(conn: Connection) {}
+/** TODO: this class is duplicate of sql's one. */
+object TestingHsqldbConnectionFactory extends JdbcDriverConnectionFactory {
+  val url = "jdbc:hsqldb:mem:hsqldb:test"
+  val driverClass = classOf[org.hsqldb.jdbc.JDBCDriver]
+  val username = ""
+  val password = ""
 }
 
