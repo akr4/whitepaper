@@ -21,7 +21,7 @@ object Whitepaper extends Build {
   def id(name: String) = "whitepaper-%s" format name
 
   val buildSettings = Defaults.defaultSettings ++ Seq(
-    version := "0.4-SNAPSHOT",
+    version := "0.4",
     organization := "net.physalis",
     crossScalaVersions := Seq("2.9.0", "2.9.0-1", "2.9.1"),
     scalaVersion := "2.9.1",
