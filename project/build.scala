@@ -37,15 +37,14 @@ object Whitepaper extends Build {
   val localResolver = "Local Maven Repository" at "file:///" + System.getProperty("user.home") + "/.m2/repository/"
 
   val loggingDependencies = Seq(
-    "ch.qos.logback" % "logback-classic" % "0.9.25" withSources,
-    "org.codehaus.groovy" % "groovy" % "1.8.0" withSources,
     "org.slf4j" % "slf4j-api" % "1.6.2" withSources,
     "org.clapper" %% "grizzled-slf4j" % "0.6.6"
   )
 
   val testDependencies = Seq(
     "org.scalatest" %% "scalatest" % "1.6.1" % "test",
-    "org.scalamock" %% "scalamock-scalatest-support" % "latest.integration" % "test"
+    "org.scalamock" %% "scalamock-scalatest-support" % "latest.integration" % "test",
+    "ch.qos.logback" % "logback-classic" % "0.9.25" % "test"
   )
 
 
