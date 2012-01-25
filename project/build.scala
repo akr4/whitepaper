@@ -21,7 +21,7 @@ object Whitepaper extends Build {
   def id(name: String) = "whitepaper-%s" format name
 
   val buildSettings = Defaults.defaultSettings ++ Seq(
-    version := "0.4-SNAPSHOT",
+    version := "0.4",
     organization := "net.physalis",
     crossScalaVersions := Seq("2.9.0", "2.9.0-1", "2.9.1"),
     scalaVersion := "2.9.1",
@@ -37,15 +37,14 @@ object Whitepaper extends Build {
   val localResolver = "Local Maven Repository" at "file:///" + System.getProperty("user.home") + "/.m2/repository/"
 
   val loggingDependencies = Seq(
-    "ch.qos.logback" % "logback-classic" % "0.9.25" withSources,
-    "org.codehaus.groovy" % "groovy" % "1.8.0" withSources,
     "org.slf4j" % "slf4j-api" % "1.6.2" withSources,
     "org.clapper" %% "grizzled-slf4j" % "0.6.6"
   )
 
   val testDependencies = Seq(
     "org.scalatest" %% "scalatest" % "1.6.1" % "test",
-    "org.scalamock" %% "scalamock-scalatest-support" % "latest.integration" % "test"
+    "org.scalamock" %% "scalamock-scalatest-support" % "latest.integration" % "test",
+    "ch.qos.logback" % "logback-classic" % "0.9.25" % "test"
   )
 
 
@@ -54,7 +53,7 @@ object Whitepaper extends Build {
 
   lazy val whitepaper = Project("whitepaper", file("."),
     settings = buildSettings
-  ) aggregate(cache, cacheEhcache, sql, sqlPostgresql, config)
+  ) aggregate(cache, cacheEhcache, sql, sqlJta, sqlPostgresql, config)
 
   lazy val cache = Project(id("cache"), file("cache"),
     settings = buildSettings ++ Seq(

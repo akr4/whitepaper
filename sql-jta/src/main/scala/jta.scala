@@ -24,7 +24,7 @@ import javax.transaction.UserTransaction
 
 class JtaTransactionManager(
   connectionFactory: ConnectionFactory,
-  jndiFinder: JndiFinder = JndiFinderImpl
+  jndiFinder: JndiFinder = DefaultJndiFinder
 ) extends TransactionManager with Using {
 
   def withTransaction[A](f: Session => A): A = {
